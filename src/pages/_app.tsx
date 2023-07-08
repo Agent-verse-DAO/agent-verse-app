@@ -1,9 +1,39 @@
-import { type AppType } from "next/app";
-import { api } from "~/utils/api";
-import "~/styles/globals.css";
+import {
+  ThirdwebProvider,
+  coinbaseWallet,
+  metamaskWallet,
+  walletConnect,
+} from "@thirdweb-dev/react";
+import { MantineProvider } from "@mantine/core";
 
-const MyApp: AppType = ({ Component, pageProps }) => {
-  return <Component {...pageProps} />;
-};
+import type { AppProps } from "next/app";
 
-export default api.withTRPC(MyApp);
+const projectId = "e7af7967ca2d36a8010858f23fbb5031";
+
+export default function App({ Component, pageProps }: AppProps) {
+  return (
+    <>
+      <ThirdwebProvider
+        activeChain="ethereum"
+        supportedWallets={[
+          metamaskWallet(),
+          coinbaseWallet(),
+          walletConnect({
+            projectId,
+          }),
+        ]}
+      >
+        <MantineProvider
+          withGlobalStyles
+          withNormalizeCSS
+          theme={{
+            colorScheme: "light",
+            primaryColor: "cyan",
+          }}
+        >
+          <Component {...pageProps} />
+        </MantineProvider>
+      </ThirdwebProvider>
+    </>
+  );
+}
