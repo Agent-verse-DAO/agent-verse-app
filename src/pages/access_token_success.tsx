@@ -8,6 +8,7 @@ import {
   Title,
 } from "@mantine/core";
 import { IconSquareRoundedCheckFilled } from "@tabler/icons-react";
+import Link from "next/link";
 
 import Header from "~/components/Header";
 
@@ -50,9 +51,11 @@ export default function NFTSuccess() {
           </Group>
 
           <Group position="center">
-            <Button variant="light" color="primary" mt="md" radius="md">
-              Switch to Subscriber Mode
-            </Button>
+            <Link href="/market" passHref>
+              <Button variant="light" color="primary" mt="md" radius="md">
+                Switch to Subscriber Mode
+              </Button>
+            </Link>
             <Button variant="filled" color="primary" mt="md" radius="md">
               Go to dashboard
             </Button>
