@@ -12,9 +12,11 @@ import {
 import { IconExternalLink } from "@tabler/icons-react";
 import { ConnectKitButton } from "connectkit";
 import { useRouter } from "next/router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAccount, useContractWrite, useWaitForTransaction } from "wagmi";
 
+import abiERC6551Registry from "~/contracts/abiERC6551Registry";
+import abiSubscriptionFactory from "~/contracts/abiSubscriptionFactory";
 import Header from "~/components/Header";
 import { env } from "~/env.mjs";
 
@@ -27,157 +29,56 @@ export default function NFTSuccess() {
 
   const { isConnected } = useAccount();
 
-  const { isLoading, write } = useContractWrite({
-    address: env.NEXT_PUBLIC_ADDRESS_ERC6551_REGISTRY as `0x${string}`,
-    abi: [
-      {
-        inputs: [],
-        name: "InitializationFailed",
-        type: "error",
-      },
-      {
-        anonymous: false,
-        inputs: [
-          {
-            indexed: false,
-            internalType: "address",
-            name: "account",
-            type: "address",
-          },
-          {
-            indexed: false,
-            internalType: "address",
-            name: "implementation",
-            type: "address",
-          },
-          {
-            indexed: false,
-            internalType: "uint256",
-            name: "chainId",
-            type: "uint256",
-          },
-          {
-            indexed: false,
-            internalType: "address",
-            name: "tokenContract",
-            type: "address",
-          },
-          {
-            indexed: false,
-            internalType: "uint256",
-            name: "tokenId",
-            type: "uint256",
-          },
-          {
-            indexed: false,
-            internalType: "uint256",
-            name: "salt",
-            type: "uint256",
-          },
-        ],
-        name: "AccountCreated",
-        type: "event",
-      },
-      {
-        inputs: [
-          {
-            internalType: "address",
-            name: "implementation",
-            type: "address",
-          },
-          {
-            internalType: "uint256",
-            name: "chainId",
-            type: "uint256",
-          },
-          {
-            internalType: "address",
-            name: "tokenContract",
-            type: "address",
-          },
-          {
-            internalType: "uint256",
-            name: "tokenId",
-            type: "uint256",
-          },
-          {
-            internalType: "uint256",
-            name: "salt",
-            type: "uint256",
-          },
-        ],
-        name: "account",
-        outputs: [
-          {
-            internalType: "address",
-            name: "",
-            type: "address",
-          },
-        ],
-        stateMutability: "view",
-        type: "function",
-      },
-      {
-        inputs: [
-          {
-            internalType: "address",
-            name: "implementation",
-            type: "address",
-          },
-          {
-            internalType: "uint256",
-            name: "chainId",
-            type: "uint256",
-          },
-          {
-            internalType: "address",
-            name: "tokenContract",
-            type: "address",
-          },
-          {
-            internalType: "uint256",
-            name: "tokenId",
-            type: "uint256",
-          },
-          {
-            internalType: "uint256",
-            name: "salt",
-            type: "uint256",
-          },
-          {
-            internalType: "bytes",
-            name: "initData",
-            type: "bytes",
-          },
-        ],
-        name: "createAccount",
-        outputs: [
-          {
-            internalType: "address",
-            name: "",
-            type: "address",
-          },
-        ],
-        stateMutability: "nonpayable",
-        type: "function",
-      },
+  const newAccount = useMemo(
+    () => [
+      env.NEXT_PUBLIC_ADDRESS_ERC6551_ACCOUNT as `0x${string}`,
+      BigInt(5), // Goerli
+      router.query.address as `0x${string}`,
+      BigInt(1), // tokenId
+      BigInt(1), // salt
+      "0x",
     ],
+    [router.query.address]
+  );
+
+  const createAccount = useContractWrite({
+    address: env.NEXT_PUBLIC_ADDRESS_ERC6551_REGISTRY as `0x${string}`,
+    abi: abiERC6551Registry,
     functionName: "createAccount",
 
     onSuccess: (result) => {
-      void router.replace(`${router.asPath}&tx=${result.hash}`);
+      console.log("createAccount result", result);
+      void router.replace(`${router.asPath}&createAccountTx=${result.hash}`);
     },
   });
 
-  const waitForTransaction = useWaitForTransaction({
-    hash: router.query.tx as `0x${string}` | undefined,
+  const deploySubscriptionContract = useContractWrite({
+    address: env.NEXT_PUBLIC_ADDRESS_SUBSCRIPTION_FACTORY as `0x${string}`,
+    abi: abiSubscriptionFactory,
+    functionName: "deploySubscriptionContract",
+
+    onSuccess: (result) => {
+      void router.replace(`${router.asPath}&deploySubTx=${result.hash}`);
+    },
   });
 
+  const createAccountTxState = useWaitForTransaction({
+    hash: router.query.createAccountTx as `0x${string}` | undefined,
+  });
+
+  console.log("createAccountTxState", createAccountTxState);
+
+  const deploySubTxState = useWaitForTransaction({
+    hash: router.query.deploySubTx as `0x${string}` | undefined,
+  });
+
+  console.log("deploySubTxState", deploySubTxState);
+
   useEffect(() => {
-    if (router.query.tx && waitForTransaction.data) {
+    if (router.query.deploySubTx && deploySubTxState.data) {
       void router.push(`/access_token_success`);
     }
-  }, [router, router.query.tx, waitForTransaction]);
+  }, [router, router.query.deploySubTx, deploySubTxState]);
 
   const renderPlan = useCallback(
     ({ title, value }: { title: string; value: string }) => {
@@ -267,24 +168,39 @@ export default function NFTSuccess() {
             {hydrated && !isConnected ? (
               <ConnectKitButton />
             ) : (
-              <Button
-                fullWidth
-                loading={isLoading || waitForTransaction.isLoading}
-                onClick={() => {
-                  write({
-                    args: [
-                      env.NEXT_PUBLIC_ADDRESS_ERC6551_ACCOUNT as `0x${string}`,
-                      BigInt(5), // Goerli
-                      router.query.address as `0x${string}`,
-                      BigInt(1), // tokenId
-                      BigInt(1), // salt
-                      "0x",
-                    ],
-                  });
-                }}
-              >
-                Create access token
-              </Button>
+              <Stack>
+                <Button
+                  fullWidth
+                  loading={
+                    createAccount.isLoading || createAccountTxState.isLoading
+                  }
+                  disabled={createAccountTxState.data !== undefined}
+                  onClick={() => {
+                    createAccount.write({
+                      args: newAccount,
+                    });
+                  }}
+                >
+                  Create access token
+                </Button>
+                {!!router.query.createAccountTx &&
+                  !!createAccountTxState.data && (
+                    <Button
+                      fullWidth
+                      loading={
+                        deploySubscriptionContract.isLoading ||
+                        deploySubTxState.isLoading
+                      }
+                      onClick={() => {
+                        deploySubscriptionContract.write({
+                          args: [env.NEXT_PUBLIC_ADDRESS_ERC6551_REGISTRY],
+                        });
+                      }}
+                    >
+                      Deploy subscription contract
+                    </Button>
+                  )}
+              </Stack>
             )}
           </Grid.Col>
         </Grid>

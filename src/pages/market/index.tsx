@@ -1,11 +1,4 @@
-import {
-  Container,
-  Group,
-  Title,
-  Grid,
-  Text,
-  Card,
-} from "@mantine/core";
+import { Container, Group, Title, Grid, Text, Card } from "@mantine/core";
 import Link from "next/link";
 import { useCallback } from "react";
 
@@ -13,11 +6,11 @@ import Header from "~/components/Header";
 
 const models = [
   {
-    name: "GPT-3",
-    symbol: "GPT3",
+    name: "New test",
+    symbol: "TEST09",
     description:
-      "GPT-3 is a language model that uses deep learning to produce human-like text. It takes in a prompt, and attempts to complete it.",
-    address: "0xf78856f617f8395f6eb7b82bc903ad36a60b77c4",
+      "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Donec et odio pellentesque diam volutpat. Ante in nibh mauris cursus mattis. Mauris commodo",
+    address: "0x17a280ebd642ecb57a3a6c10b32f41cda4625612",
   },
   {
     name: "GPT-3",
