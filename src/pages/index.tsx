@@ -92,8 +92,14 @@ export default function CreateNFT() {
   });
 
   useEffect(() => {
-    if (router.query.tx && waitForTransaction.data) {
-      void router.push(`/nft_success`);
+    if (
+      router.query.tx &&
+      waitForTransaction.data &&
+      waitForTransaction.data?.logs?.[0]?.address
+    ) {
+      void router.push(
+        `/nft_success?address=${waitForTransaction.data.logs[0].address}`
+      );
     }
   }, [router, router.query.tx, waitForTransaction]);
 

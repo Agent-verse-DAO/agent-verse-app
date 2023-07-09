@@ -9,18 +9,173 @@ import {
   Card,
 } from "@mantine/core";
 import { ConnectKitButton } from "connectkit";
+import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
-import { useAccount } from "wagmi";
+import { useAccount, useContractWrite, useWaitForTransaction } from "wagmi";
 
 import Header from "~/components/Header";
+import { env } from "~/env.mjs";
 
 export default function NFTSuccess() {
+  const router = useRouter();
   const [hydrated, setHydrated] = useState(false);
   useEffect(() => {
     setHydrated(true);
   }, []);
 
   const { isConnected } = useAccount();
+
+  const { isLoading, write } = useContractWrite({
+    address: env.NEXT_PUBLIC_ADDRESS_ERC6551_REGISTRY as `0x${string}`,
+    abi: [
+      {
+        inputs: [],
+        name: "InitializationFailed",
+        type: "error",
+      },
+      {
+        anonymous: false,
+        inputs: [
+          {
+            indexed: false,
+            internalType: "address",
+            name: "account",
+            type: "address",
+          },
+          {
+            indexed: false,
+            internalType: "address",
+            name: "implementation",
+            type: "address",
+          },
+          {
+            indexed: false,
+            internalType: "uint256",
+            name: "chainId",
+            type: "uint256",
+          },
+          {
+            indexed: false,
+            internalType: "address",
+            name: "tokenContract",
+            type: "address",
+          },
+          {
+            indexed: false,
+            internalType: "uint256",
+            name: "tokenId",
+            type: "uint256",
+          },
+          {
+            indexed: false,
+            internalType: "uint256",
+            name: "salt",
+            type: "uint256",
+          },
+        ],
+        name: "AccountCreated",
+        type: "event",
+      },
+      {
+        inputs: [
+          {
+            internalType: "address",
+            name: "implementation",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "chainId",
+            type: "uint256",
+          },
+          {
+            internalType: "address",
+            name: "tokenContract",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "tokenId",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "salt",
+            type: "uint256",
+          },
+        ],
+        name: "account",
+        outputs: [
+          {
+            internalType: "address",
+            name: "",
+            type: "address",
+          },
+        ],
+        stateMutability: "view",
+        type: "function",
+      },
+      {
+        inputs: [
+          {
+            internalType: "address",
+            name: "implementation",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "chainId",
+            type: "uint256",
+          },
+          {
+            internalType: "address",
+            name: "tokenContract",
+            type: "address",
+          },
+          {
+            internalType: "uint256",
+            name: "tokenId",
+            type: "uint256",
+          },
+          {
+            internalType: "uint256",
+            name: "salt",
+            type: "uint256",
+          },
+          {
+            internalType: "bytes",
+            name: "initData",
+            type: "bytes",
+          },
+        ],
+        name: "createAccount",
+        outputs: [
+          {
+            internalType: "address",
+            name: "",
+            type: "address",
+          },
+        ],
+        stateMutability: "nonpayable",
+        type: "function",
+      },
+    ],
+    functionName: "createAccount",
+
+    onSuccess: (result) => {
+      void router.replace(`${router.asPath}&tx=${result.hash}`);
+    },
+  });
+
+  const waitForTransaction = useWaitForTransaction({
+    hash: router.query.tx as `0x${string}` | undefined,
+  });
+
+  useEffect(() => {
+    if (router.query.tx && waitForTransaction.data) {
+      void router.push(`/access_token_success`);
+    }
+  }, [router, router.query.tx, waitForTransaction]);
 
   const renderPlan = useCallback(
     ({ title, value }: { title: string; value: string }) => {
@@ -97,7 +252,24 @@ export default function NFTSuccess() {
             {hydrated && !isConnected ? (
               <ConnectKitButton />
             ) : (
-              <Button fullWidth>Create access token</Button>
+              <Button
+                fullWidth
+                loading={isLoading || waitForTransaction.isLoading}
+                onClick={() => {
+                  write({
+                    args: [
+                      env.NEXT_PUBLIC_ADDRESS_ERC6551_ACCOUNT as `0x${string}`,
+                      BigInt(5), // Goerli
+                      router.query.address as `0x${string}`,
+                      BigInt(1), // tokenId
+                      BigInt(1), // salt
+                      "0x",
+                    ],
+                  });
+                }}
+              >
+                Create access token
+              </Button>
             )}
           </Grid.Col>
         </Grid>
