@@ -51,7 +51,7 @@ export default function NFTSuccess() {
 
           <Group position="center">
             <Button variant="light" color="primary" mt="md" radius="md">
-              Back to NFT details
+              Switch to Subscriber Mode
             </Button>
             <Button variant="filled" color="primary" mt="md" radius="md">
               Go to dashboard

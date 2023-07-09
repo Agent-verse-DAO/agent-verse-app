@@ -149,8 +149,7 @@ export default function CreateNFT() {
               payment. As the original creator of the model, you are entitled to
               5% royalties for all the subsequent secondary sales.
               <p>
-                All the subscription, resale and royalties payments are settled
-                in ETH.
+                All the subscription, resale and royalty payments are settled in ETH.
               </p>
             </Text>
           </Grid.Col>

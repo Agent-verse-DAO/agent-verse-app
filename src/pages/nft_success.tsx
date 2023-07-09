@@ -204,7 +204,7 @@ export default function NFTSuccess() {
         <Grid gutter={48}>
           <Grid.Col span={7}>
             <Title order={2} size="1rem" mb={8}>
-              Now its time to create Access Tokens.
+              Now it’s time to create Access Tokens.
             </Title>
             <Text>
               <p>
