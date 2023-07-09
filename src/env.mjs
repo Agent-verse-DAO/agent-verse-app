@@ -17,7 +17,11 @@ export const env = createEnv({
    * `NEXT_PUBLIC_`.
    */
   client: {
-    // NEXT_PUBLIC_CLIENTVAR: z.string().min(1),
+    NEXT_PUBLIC_INFURA_API_KEY: z.string().min(1),
+    NEXT_PUBLIC_ADDRESS_NFT_FACTORY: z.string().startsWith("0x"),
+    NEXT_PUBLIC_ADDRESS_SUBSCRIPTION_FACTORY: z.string().startsWith("0x"),
+    NEXT_PUBLIC_ADDRESS_ERC6551_REGISTRY: z.string().startsWith("0x"),
+    NEXT_PUBLIC_ADDRESS_ERC6551_ACCOUNT: z.string().startsWith("0x"),
   },
 
   /**
@@ -25,9 +29,17 @@ export const env = createEnv({
    * middlewares) or client-side so we need to destruct manually.
    */
   runtimeEnv: {
+    NEXT_PUBLIC_INFURA_API_KEY: process.env.NEXT_PUBLIC_INFURA_API_KEY,
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
-    // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
+    NEXT_PUBLIC_ADDRESS_NFT_FACTORY:
+      process.env.NEXT_PUBLIC_ADDRESS_NFT_FACTORY,
+    NEXT_PUBLIC_ADDRESS_SUBSCRIPTION_FACTORY:
+      process.env.NEXT_PUBLIC_ADDRESS_SUBSCRIPTION_FACTORY,
+    NEXT_PUBLIC_ADDRESS_ERC6551_REGISTRY:
+      process.env.NEXT_PUBLIC_ADDRESS_ERC6551_REGISTRY,
+    NEXT_PUBLIC_ADDRESS_ERC6551_ACCOUNT:
+      process.env.NEXT_PUBLIC_ADDRESS_ERC6551_ACCOUNT,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation.
