@@ -7,7 +7,9 @@ import {
   Grid,
   Text,
   Card,
+  Anchor,
 } from "@mantine/core";
+import { IconExternalLink } from "@tabler/icons-react";
 import { ConnectKitButton } from "connectkit";
 import { useRouter } from "next/router";
 import { useCallback, useEffect, useState } from "react";
@@ -198,8 +200,21 @@ export default function NFTSuccess() {
       <Header />
 
       <Container size="md" px="md" py="sm">
-        <Title order={1} mb={32}>
-          You’ve created an NFT for your model!
+        <Title order={1}>You’ve created an NFT for your model!</Title>
+        <Title order={3} size="0.875rem" mb={32}>
+          <Anchor
+            href={`https://goerli.etherscan.io/address/${
+              router.query.address as string
+            }`}
+            target="_blank"
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.25rem",
+            }}
+          >
+            {router.query.address} <IconExternalLink size={12} />
+          </Anchor>
         </Title>
         <Grid gutter={48}>
           <Grid.Col span={7}>
